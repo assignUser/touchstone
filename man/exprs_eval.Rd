@@ -4,13 +4,13 @@
 \alias{exprs_eval}
 \title{Evaluate an expression for sideeffects}
 \usage{
-exprs_eval(..., env = parent.frame())
+exprs_eval(quos, env = parent.frame())
 }
 \arguments{
+\item{env}{Environment in which the expression will be evaluated.}
+
 \item{...}{Character vector  of length 1 or expression with code to evaluate. This will be quoted using
 \code{\link[rlang:nse-defuse]{rlang::enexprs()}}, so you can use \verb{!!}.}
-
-\item{env}{Environment in which the expression will be evaluated.}
 }
 \value{
 The quoted input (invisibly).
