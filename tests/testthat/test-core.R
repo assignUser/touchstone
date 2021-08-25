@@ -1,8 +1,8 @@
 test_that("iterations can be run", {
   local_package()
   bm <- benchmark_run_iteration(
-    expr_before_benchmark = "library(testthat)",
-    dots = list(expr_to_benchmark = "expect_equal(Sys.sleep(1e-3), NULL)"),
+    expr_before_benchmark = rlang::quo("library(testthat)"),
+    dots = list(expr_to_benchmark = rlang::quo("expect_equal(Sys.sleep(1e-3), NULL)")),
     ref = "benchmark_run_iteration",
     block = 1,
     n = 2
@@ -28,7 +28,7 @@ test_that("dynamic dots are supported", {
   path_test_pkg <- local_package()
   x <- "cc"
   bm <- benchmark_run_ref(
-    expr_before_benchmark = "",
+    expr_before_benchmark = "NA",
     !!x := "Sys.sleep(0)",
     refs = "main",
     n = 1
@@ -37,7 +37,7 @@ test_that("dynamic dots are supported", {
   expect_equal(schema, schema_disk())
   vec <- c("xzy" = "Sys.sleep(0)")
   bm <- benchmark_run_ref(
-    expr_before_benchmark = "",
+    expr_before_benchmark = "NA",
     !!!vec,
     refs = "main",
     n = 1,

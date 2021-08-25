@@ -4,8 +4,8 @@ test_that("can analyze results", {
   branches <- c("devel", "c4")
   path_test_pkg <- local_package(branches = branches)
   purrr::walk(branches, ~ benchmark_run_iteration(
-    "",
-    dots = list(xx1 = "Sys.sleep(runif(1, 0, 1e-5))"),
+    rlang::quo("NA"),
+    dots = list(xx1 = rlang::quo("Sys.sleep(runif(1, 0, 1e-5))")),
     n = 2,
     ref = .x,
     block = 1
@@ -33,16 +33,16 @@ test_that("can analyze results", {
   branches <- c("devel", "c4")
   path_test_pkg <- local_package(branches = branches)
   purrr::walk(branches, ~ benchmark_run_iteration(
-    "",
-    dots = list(xx1 = "Sys.sleep(runif(1, 0, 1e-5))"),
+    rlang::quo("NA"),
+    dots = list(xx1 = rlang::quo("Sys.sleep(runif(1, 0, 1e-5))")),
     n = 2,
     ref = .x,
     block = 1
   ))
 
   purrr::walk(branches, ~ benchmark_run_iteration(
-    "",
-    dots = list(xx2 = "Sys.sleep(runif(1, 0, 1e-5))"),
+    rlang::quo("NA"),
+    dots = list(xx2 = rlang::quo("Sys.sleep(runif(1, 0, 1e-5))")),
     n = 2,
     ref = .x,
     block = 1
@@ -63,3 +63,4 @@ test_that("can analyze results", {
   )
   expect_true(fs::file_exists("touchstone/plots/xx2.png"))
 })
+
