@@ -61,26 +61,41 @@ touchstone_clear <- function(all = FALSE) {
 #' @param env Environment in which the expression will be evaluated.
 #' @return The quoted input (invisibly).
 #' @keywords internal
-exprs_eval <- function(..., env = parent.frame()) {
-    
-    expr <- rlang::enexprs(...)[[1]]
+exprs_eval <- function(quos, env = parent.frame()) {
+  parse_quo <- function(is_char, quo) {
+    if (is_char) {
+      quo <- quo %>%
+        rlang::get_expr() %>%
+        rlang::parse_expr() %>%
+        rlang::quo_set_expr(quo, .)
 
-    if (is.symbol(expr)) {
-    expr <- rlang::eval_tidy(expr, env = env)
+      quo <- rlang::quo_set_env(quo, env)
     }
+    quo
+  }
 
-    if (is.character(expr)) {
-        expr <- rlang::parse_exprs(expr)
-    }
+  eval_quo <- function(quo) {
+    eval(rlang::quo_get_expr(quo), envir = rlang::quo_get_env(quo))
+  }
 
-    if (is.list(expr)) {
-     purrr::map(expr, eval, envir = env)
-    } else {
-      eval(expr, envir = env)
-    }
+  if (is.list(quos)) {
+    quos <- quos %>%
+      purrr::map(rlang::get_expr) %>%
+      purrr::map_lgl(is.character) %>%
+      purrr::map2(quos, ~ parse_quo(.x, .y))
+  } else {
+    quos <- parse_quo(is.character(rlang::get_expr(quos)), quos)
+  }
 
-    invisible(expr)
+  if (is.list(quos)) {
+    purrr::map(quos, eval_quo)
+  } else {
+   eval_quo(quos)
+  }
+
+  #sinvisible(quos)
 }
+
 
 #' Samples `ref`
 #'

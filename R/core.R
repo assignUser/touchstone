@@ -12,7 +12,7 @@ benchmark_run_iteration <- function(expr_before_benchmark,
                                     block,
                                     n = getOption("touchstone.n_iterations", 1)) {
   if (rlang::is_missing(expr_before_benchmark)) {
-    expr_before_benchmark <- ""
+    expr_before_benchmark <- rlang::quo("NA")
   }
 
   args <- rlang::list2(
@@ -27,8 +27,8 @@ benchmark_run_iteration <- function(expr_before_benchmark,
         new_name <- "masked_touchstone"
         attach(loadNamespace("touchstone"), name = new_name)
         on.exit(detach(new_name, character.only = TRUE), add = TRUE)
-        exprs_eval(!!expr_before_benchmark)
-        benchmark <- bench::mark(exprs_eval(!!dots[[1]]), memory = FALSE, iterations = 1)
+        exprs_eval(expr_before_benchmark)
+        benchmark <- bench::mark(exprs_eval(dots), memory = FALSE, iterations = 1)
         benchmark_write(benchmark, names(dots), ref = ref, block = block, iteration = iteration)
       },
       args = append(args, lst(iteration)),
@@ -75,12 +75,13 @@ benchmark_run_ref <- function(expr_before_benchmark,
                               n = 100,
                               path_pkg = ".") {
   force(refs)
-  expr_before_benchmark <- rlang::enexpr(expr_before_benchmark)
-  dots <- rlang::enexprs(...)
-
+  expr_before_benchmark <- rlang::enquo(expr_before_benchmark)
+  dots <- rlang::enquos(...)
+  
   if (length(dots) > 1) {
     rlang::abort("Can only pass one expression to benchmark")
   }
+
   # touchstone libraries must be removed from the path temporarily
   # and the one to benchmark will be added in benchmark_run_ref_impl()
   local_without_touchstone_lib()
