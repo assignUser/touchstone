@@ -247,7 +247,7 @@ add_lib_dirs <- function(...) {
 #' @description The benchmark will only run if *any* file of `files` was modified
 #' compared to `ref`. This allows for shorter commit messages.
 #' @param files Character vector with paths to files to check for change.
-#' @param benchmark Call to [benchmark_ref_run()].
+#' @param benchmark Call to [benchmark_run_ref].
 #' @param refs Git refs to compare.
 #' @examples \dontrun{
 #' touchstone::run_on_change(

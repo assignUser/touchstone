@@ -13,7 +13,7 @@ run_on_change(
 \arguments{
 \item{files}{Character vector with paths to files to check for change.}
 
-\item{benchmark}{Call to \code{\link[=benchmark_ref_run]{benchmark_ref_run()}}.}
+\item{benchmark}{Call to \link{benchmark_run_ref}.}
 
 \item{refs}{Git refs to compare.}
 }
