@@ -239,7 +239,6 @@ get_changed_files <- function(refs = c(
                                 ref_get_or_fail("GITHUB_BASE_REF"),
                                 ref_get_or_fail("GITHUB_HEAD_REF")
                               )) {
-                                
   creat_try_error <- function(...) {
     structure(
       "Git Error.",
@@ -255,6 +254,7 @@ get_changed_files <- function(refs = c(
   error = creat_try_error(e),
   warning = creat_try_error(w)
   )
+}
 
 #' Add library directory
 #'
