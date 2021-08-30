@@ -307,8 +307,7 @@ get_changed_files <- function(refs = c(
 
   tryCatch(system(
     glue::glue("git diff --name-only {refs[[1]]} {refs[[2]]} --"),
-    intern = TRUE,
-    show.output.on.console = FALSE
+    intern = TRUE
   ),
   silent = TRUE,
   error = creat_try_error(e),
