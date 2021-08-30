@@ -242,6 +242,7 @@ get_changed_files <- function(refs = c(
     glue::glue("git diff --name-only {refs[[1]]} {refs[[2]]} --"),
     intern = TRUE,
     show.output.on.console = FALSE,
-    ignore.stderr = TRUE
+    ignore.stderr = TRUE,
+    ignore.stdout = TRUE
   ))
 }
