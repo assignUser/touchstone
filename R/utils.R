@@ -186,7 +186,7 @@ is_windows <- function() {
 #' Add library directory
 #'
 #' @description Add directories that need to be available when running
-#'   `script.R`. During [benchmark_run_ref] they will be placed in the
+#'   `script.R`. During [benchmark_run_ref()] they will be placed in the
 #'    same directory as `script.R`.
 #' @param ... A number of directories, as strings in relation to the current
 #'   working directory, that contain scripts you want to source in `script.R`.
@@ -247,7 +247,7 @@ add_lib_dirs <- function(...) {
 #' @description The benchmark will only run if *any* file of `files` was modified
 #' compared to `ref`. This allows for shorter commit messages.
 #' @param files Character vector with paths to files to check for change.
-#' @param benchmark Call to [benchmark_ref_run].
+#' @param benchmark Call to [benchmark_ref_run()].
 #' @param refs Git refs to compare.
 #' @examples \dontrun{
 #' touchstone::run_on_change(

@@ -15,7 +15,7 @@ The temp dir invisibly.
 }
 \description{
 Add directories that need to be available when running
-\code{script.R}. During \link{benchmark_run_ref} they will be placed in the
+\code{script.R}. During \code{\link[=benchmark_run_ref]{benchmark_run_ref()}} they will be placed in the
 same directory as \code{script.R}.
 }
 \examples{
