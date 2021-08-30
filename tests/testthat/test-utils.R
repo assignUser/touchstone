@@ -188,7 +188,7 @@ test_that("can run benchmark conditonally", {
   }
 
   expect_silent(usethis::ui_silence(
-    run_on_change("a", run_error(skip_me = 23), refs = c("", ""))
+    run_on_change("a", run_error(skip_me = 23), refs = branches)
   ))
 
   expect_error(
