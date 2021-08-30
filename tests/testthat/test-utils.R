@@ -186,13 +186,20 @@ test_that("can run benchmark conditonally", {
       glue::glue("setup branch {branch}.")
     )
   }
-  
+
   expect_silent(usethis::ui_silence(
     run_on_change("a", run_error(skip_me = 23), refs = c("", ""))
   ))
 
-  expect_error(   
-      run_on_change("R/core.R", run_error(skip_me = 23), refs = branches),
+  expect_error(
+    run_on_change("R/core.R", run_error(skip_me = 23), refs = branches),
+    "not Skip"
+  )
+  expect_error(
+    run_on_change(c("R/core.R", "R/not_changed.R"),
+      run_error(skip_me = 23),
+      refs = branches
+    ),
     "not Skip"
   )
 })
