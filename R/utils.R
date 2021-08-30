@@ -183,6 +183,7 @@ is_windows <- function() {
   identical(.Platform$OS.type, "windows")
 }
 
+
 #' Run benchmark on file change
 #'
 #' @description The benchmark will only run if *any* file of `files` was modified
@@ -254,4 +255,62 @@ get_changed_files <- function(refs = c(
   error = creat_try_error(e),
   warning = creat_try_error(w)
   )
+
+#' Add library directory
+#'
+#' @description Add directories that need to be available when running
+#'   `script.R`. During [benchmark_run_ref] they will be placed in the
+#'    same directory as `script.R`.
+#' @param ... A number of directories, as strings in relation to the current
+#'   working directory, that contain scripts you want to source in `script.R`.
+#' @return The temp dir invisibly.
+#' @examples
+#' \dontrun{
+#' # In script.R
+#' add_lib_dirs(c("bench", "inst/scripts"))
+#'
+#' source("scripts/setup.R")
+#'
+#' touchstone::benchmark_run_ref(
+#'   expr_before_benchmark = {
+#'     !!setup
+#'     source("bench/exprs.R")
+#'   },
+#'   run_me = some_exprs(),
+#'   n = 6
+#' )
+#' }
+#' @export
+add_lib_dirs <- function(...) {
+  temp_dir <- getOption("touchstone.temp_dir")
+
+  if (is.null(temp_dir)) {
+    usethis::ui_stop(c(
+      "Temporary directory not found. ",
+      "This function is only for use within 'script.R'."
+    ))
+  }
+
+  dirs <- rlang::list2(...)
+
+  valid_dirs <- dirs %>% purrr::map_lgl(fs::is_dir)
+
+  if (!all(valid_dirs)) {
+    usethis::ui_warn(c(
+      "The following path(s) could not be found",
+      " and will not be copied:",
+      usethis::ui_path(unlist(dirs[!valid_dirs]))
+    ))
+  }
+
+  dirs[valid_dirs] %>% purrr::map(~ fs::dir_copy(.x,
+    fs::path_join(c(temp_dir, fs::path_file(.x))),
+    overwrite = TRUE
+  ))
+
+  usethis::ui_done(c(
+    "Copied library directories to tempdir to make them available across branch checkouts."
+  ))
+
+  invisible(temp_dir)
 }
