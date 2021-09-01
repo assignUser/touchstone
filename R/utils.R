@@ -182,3 +182,135 @@ is_installed <- function(path_pkg = ".") {
 is_windows <- function() {
   identical(.Platform$OS.type, "windows")
 }
+
+
+#' Run benchmark on file change
+#'
+#' @description The benchmark will only run if *any* file of `files` was modified
+#' compared to `ref`. This allows for shorter commit messages.
+#' @param files Character vector with paths to files to check for change.
+#' @param benchmark Call to [benchmark_run_ref].
+#' @param refs Git refs to compare.
+#' @examples \dontrun{
+#' touchstone::run_on_change(
+#'   "R/core.R",
+#'   touchstone::benchmark_run_ref(
+#'     expr_before_benchmark = source(c("dir/data.R", "dir/another.R")),
+#'     random_test = yourpkg::f(),
+#'     n = 2
+#'   )
+#' )
+#' }
+#' @export
+run_on_change <- function(files, benchmark,
+                          refs = c(
+                            ref_get_or_fail("GITHUB_BASE_REF"),
+                            ref_get_or_fail("GITHUB_HEAD_REF")
+                          )) {
+  benchmark <- rlang::enquo(benchmark)
+  changed_files <- get_changed_files(refs)
+  override <- FALSE
+
+  if (inherits(changed_files, "try-error")) {
+    usethis::ui_oops("Could not check for changes. Running benchmark.")
+    override <- TRUE
+  }
+
+  if (override || any(files %in% changed_files)) {
+    rlang::eval_tidy(benchmark)
+  } else {
+    f_names <- formalArgs(touchstone::benchmark_run_ref)
+    b_name <- rlang::quo_get_expr(benchmark) %>%
+      names() %>%
+      setdiff(f_names) %>%
+      purrr::keep(nzchar)
+
+    usethis::ui_info("Skipped benchmark '{b_name[[1]]}'")
+  }
+}
+
+#' Get changed files.
+#'
+#' @description description
+#' @param refs  Git refs to compare.
+#' @return Character Vector of file names or an error object.
+#' @keywords internal
+get_changed_files <- function(refs = c(
+                                ref_get_or_fail("GITHUB_BASE_REF"),
+                                ref_get_or_fail("GITHUB_HEAD_REF")
+                              )) {
+  creat_try_error <- function(...) {
+    structure(
+      "Git Error.",
+      class = c("try-error", "character")
+    )
+  }
+
+  tryCatch(system(
+    glue::glue("git diff --name-only {refs[[1]]} {refs[[2]]} --"),
+    intern = TRUE
+  ),
+  silent = TRUE,
+  error = creat_try_error(e),
+  warning = creat_try_error(w)
+  )
+}
+
+#' Add library directory
+#'
+#' @description Add directories that need to be available when running
+#'   `script.R`. During [benchmark_run_ref] they will be placed in the
+#'    same directory as `script.R`.
+#' @param ... A number of directories, as strings in relation to the current
+#'   working directory, that contain scripts you want to source in `script.R`.
+#' @return The temp dir invisibly.
+#' @examples
+#' \dontrun{
+#' # In script.R
+#' add_lib_dirs(c("bench", "inst/scripts"))
+#'
+#' source("scripts/setup.R")
+#'
+#' touchstone::benchmark_run_ref(
+#'   expr_before_benchmark = {
+#'     !!setup
+#'     source("bench/exprs.R")
+#'   },
+#'   run_me = some_exprs(),
+#'   n = 6
+#' )
+#' }
+#' @export
+add_lib_dirs <- function(...) {
+  temp_dir <- getOption("touchstone.temp_dir")
+
+  if (is.null(temp_dir)) {
+    usethis::ui_stop(c(
+      "Temporary directory not found. ",
+      "This function is only for use within 'script.R'."
+    ))
+  }
+
+  dirs <- rlang::list2(...)
+
+  valid_dirs <- dirs %>% purrr::map_lgl(fs::is_dir)
+
+  if (!all(valid_dirs)) {
+    usethis::ui_warn(c(
+      "The following path(s) could not be found",
+      " and will not be copied:",
+      usethis::ui_path(unlist(dirs[!valid_dirs]))
+    ))
+  }
+
+  dirs[valid_dirs] %>% purrr::map(~ fs::dir_copy(.x,
+    fs::path_join(c(temp_dir, fs::path_file(.x))),
+    overwrite = TRUE
+  ))
+
+  usethis::ui_done(c(
+    "Copied library directories to tempdir to make them available across branch checkouts."
+  ))
+
+  invisible(temp_dir)
+}

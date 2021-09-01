@@ -17,6 +17,7 @@ benchmark_run_ref(
 the benchmark is ran, will be evaluated with \code{\link[=exprs_eval]{exprs_eval()}}.}
 
 \item{...}{Named expression or named character vector of length one with code to benchmark, will
+
 be evaluated with \code{\link[=exprs_eval]{exprs_eval()}}.}
 
 \item{refs}{Character vector with branch names to benchmark. The package
